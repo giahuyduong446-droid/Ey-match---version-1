@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MATHEC – Thạo Y</title>
+<style>
+:root{--bg:#f3f7f6;--ink:#0f2a28;--mut:#52696a;--ok:#0f766e;--onok:#fff;--warn:#b45309;--bad:#b91c1c;--card:#fff;--line:#d3dfdd}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1615;--ink:#e6f2f0;--mut:#95b0ac;--ok:#2dd4bf;--onok:#04201c;--warn:#fbbf24;--bad:#f87171;--card:#14211f;--line:#27403c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:env(safe-area-inset-top,0) 0 84px}
+main{max-width:680px;margin:0 auto;padding:12px}h1{font-size:20px;margin:4px 0}h2{font-size:17px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:10px 0}.warn{border-color:var(--warn)}
+.mut{color:var(--mut);font-size:14px}label{display:block;font-weight:600;font-size:14px;margin:8px 0 3px}
+input,textarea,select{width:100%;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:130px}input[type=range]{padding:0}
+button{font:inherit;font-weight:600;border-radius:10px;padding:10px 16px;border:1px solid var(--ok);background:var(--ok);color:var(--onok);cursor:pointer;margin:6px 6px 0 0}
+button.alt{background:transparent;color:var(--ok)}button:disabled{opacity:.5}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+.stage{position:relative;border-radius:12px;overflow:hidden;background:#000;aspect-ratio:4/3}
+.stage video,.stage canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#pv{width:100%;border-radius:10px;margin-top:8px;background:#000}
+.badge{position:absolute;left:10px;top:10px;z-index:2;padding:3px 10px;border-radius:99px;background:rgba(0,0,0,.65);color:#fff;font-size:13px}.badge.on{background:var(--ok);color:var(--onok)}
+.cue{margin:10px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-weight:600;min-height:46px}.cue.w{border-color:var(--warn);color:var(--warn)}
+.bar{height:8px;border-radius:99px;background:var(--line);margin:8px 0;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ok);transition:width .2s}
+.r{border-top:1px solid var(--line);padding:8px 0}.r b{display:block}.r small{color:var(--mut)}.ok{color:var(--ok)}.bad{color:var(--bad)}.na{color:var(--warn)}
+#msg{font-weight:600;min-height:24px}
+.vm video,.vm iframe{width:100%;aspect-ratio:16/9;border-radius:10px;background:#000;border:0;display:block}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0)}
+nav button{flex:1;margin:0;border:0;border-radius:0;background:transparent;color:var(--mut);padding:14px 4px}
+nav button[aria-selected=true]{color:var(--ok);box-shadow:inset 0 3px 0 var(--ok)}
+</style></head><body><main>
+<h1>MATHEC <span class="mut">Thạo Y</span></h1>
+<section id="learn"><div class="card"><h2>Video mẫu</h2><div id="vm" class="vm"><p class="mut">Đang kiểm tra video mẫu...</p></div><div id="vlab" class="mut"></div>
+<details><summary class="mut">Thêm video mẫu (dành cho giảng viên)</summary>
+<label for="vf">Chọn video từ máy này</label><input id="vf" type="file" accept="video/*">
+<label for="vl">Hoặc dán link YouTube</label><input id="vl" placeholder="https://youtu.be/...">
+<button id="vlb" class="alt">Dùng link</button><button id="vx" class="alt">Xóa video trên máy này</button>
+<p class="mut">Video thêm ở đây chỉ hiện trên thiết bị này. Muốn mọi người cùng thấy, đặt file tên video-mau.mp4 vào kho GitHub.</p></details></div>
+<div class="card"><h2>Học: rửa tay thường quy</h2><ol id="ls"></ol><p class="mut">Bảng kiểm nháp, cần giảng viên duyệt. Sửa ở tab "Chấm video".</p><button id="tog">Đã xem, sang chấm video</button></div>
+<div class="card warn">AI chỉ để luyện tập, không phải điểm thi. Chỉ dùng video của người đã đồng ý, không có bệnh nhân.</div></section>
+
+<section id="grade" hidden>
+<div class="card"><h2>1. Khóa API và mô hình</h2><label for="key">Khóa API (không gửi cho ai)</label><input id="key" type="password" autocomplete="off">
+<label for="model">Tên mô hình</label><input id="model" value="gemini-2.5-flash"><p class="mut">Báo lỗi mô hình thì chọn bản Flash mới nhất trong AI Studio và dán vào đây.</p></div>
+<div class="card"><h2>2. Bảng kiểm (mỗi dòng một bước)</h2><textarea id="cl">Chà hai lòng bàn tay vào nhau.
+Chà lòng bàn tay này lên mu bàn tay kia, rồi đổi tay.
+Chà hai lòng bàn tay vào nhau, các ngón đan chéo.
+Chà mặt ngoài các ngón tay vào lòng bàn tay kia.
+Xoay ngón tay cái trong lòng bàn tay kia, rồi đổi tay.
+Chụm đầu ngón tay xoay trong lòng bàn tay kia, rồi đổi tay.</textarea></div>
+<div class="card"><h2>3. Chọn hoặc quay video</h2><p class="mut">Video được gửi lên Google để chấm. Gói miễn phí có thể được dùng để cải thiện sản phẩm.</p>
+<input id="file" type="file" accept="video/*"><video id="pv" controls playsinline hidden></video><button id="go">Chấm video</button><div id="msg" role="status" aria-live="polite"></div></div>
+<div class="card" id="out" hidden><h2>4. Kết quả AI</h2><div id="rows"></div><div id="adv" class="mut"></div><button id="save" class="alt">Lưu lượt này</button></div>
+<div class="card"><h2>5. Độ khớp AI và giảng viên</h2><div id="st" class="mut"></div><button id="csv" class="alt">Tải CSV</button><button id="clr" class="alt">Xóa dữ liệu</button></div>
+</section>
+
+<section id="live" hidden>
+<div class="stage"><video id="v" playsinline muted></video><canvas id="c"></canvas><div class="badge" id="bd">Chưa bật camera</div></div>
+<div class="cue" id="cue" role="status" aria-live="polite">Nhấn "Bật camera và AI", đứng cách camera một sải tay.</div>
+<div class="card"><b id="st2">Chưa bắt đầu</b><div class="mut" id="si">Mỗi bước khoảng 7 giây chà thật sự.</div><div class="bar"><i id="pb"></i></div></div>
+<button id="start">Bật camera và AI</button><button id="begin" class="alt" disabled>Bắt đầu rửa tay</button>
+<details><summary class="mut">Chỉnh độ nhạy</summary>
+<label for="tg">Hai tay "áp sát" khi nhỏ hơn: <output id="tgo">1.4</output></label><input id="tg" type="range" min="0.5" max="3" step="0.1" value="1.4">
+<label for="mv">"Đang chà" khi tốc độ lớn hơn: <output id="mvo">0.4</output></label><input id="mv" type="range" min="0.1" max="2" step="0.05" value="0.4"></details>
+<p id="sum" class="card" hidden style="white-space:pre-line"></p>
+<p class="mut">Bản này chỉ kiểm tra hai tay áp sát và đang chuyển động, chưa nhận biết từng bước. Video xử lý trên máy bạn, không gửi đi.</p>
+</section></main>
+<nav role="tablist"><button role="tab" data-t="learn" aria-selected="true">Học</button><button role="tab" data-t="grade" aria-selected="false">Chấm video</button><button role="tab" data-t="live" aria-selected="false">Luyện live</button></nav>
+<script type="module">
+const $=i=>document.getElementById(i),ST=["Đạt","Chưa đạt","Không xác định"];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const steps=()=>$("cl").value.split("\n").map(s=>s.trim()).filter(Boolean);
+const lsr=()=>$("ls").innerHTML=steps().map(s=>`<li>${esc(s)}</li>`).join("");lsr();$("cl").oninput=lsr;
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("section").forEach(s=>s.hidden=s.id!==b.dataset.t);document.querySelectorAll("nav button").forEach(x=>x.setAttribute("aria-selected",x===b));scrollTo(0,0)});
+for(const [a,o] of [["tg","tgo"],["mv","mvo"]])$(a).oninput=()=>$(o).textContent=$(a).value;
+/* ---------- VIDEO MẪU ---------- */
+const SHARED="video-mau.mp4";
+const idb=()=>new Promise((res,rej)=>{const q=indexedDB.open("mathec",1);q.onupgradeneeded=()=>q.result.createObjectStore("f");q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)});
+const idbPut=async(k,v)=>{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction("f","readwrite");t.objectStore("f").put(v,k);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
+const idbGet=async k=>{const d=await idb();return new Promise((res,rej)=>{const r=d.transaction("f").objectStore("f").get(k);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})};
+const idbDel=async k=>{const d=await idb();return new Promise((res,rej)=>{const t=d.transaction("f","readwrite");t.objectStore("f").delete(k);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
+function setVM(h,l){$("vm").innerHTML=h;$("vlab").textContent=l}
+async function loadVM(){
+ try{const b=await idbGet("sample");if(b){setVM("<video controls playsinline></video>","Video mẫu lưu trên thiết bị này.");$("vm").firstChild.src=URL.createObjectURL(b);return}}catch(e){}
+ let link="";try{link=localStorage.getItem("mathec_vlink")||""}catch(e){}
+ if(link){setVM(`<iframe src="${esc(link)}" allow="fullscreen" allowfullscreen></iframe>`,"Video mẫu từ link YouTube.");return}
+ try{const r=await fetch(SHARED,{method:"HEAD"});if(r.ok){setVM("<video controls playsinline></video>","Video mẫu của giảng viên.");$("vm").firstChild.src=SHARED;return}}catch(e){}
+ setVM('<p class="mut">Chưa có video mẫu. Giảng viên có thể thêm ở mục bên dưới.</p>',"");
+}
+$("vf").onchange=async()=>{const f=$("vf").files[0];if(!f)return;try{await idbPut("sample",f);loadVM()}catch(e){setVM('<p class="mut">Không lưu được video trên thiết bị này.</p>',"")}};
+$("vlb").onclick=()=>{const m=/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/.exec($("vl").value);if(!m){$("vlab").textContent="Link YouTube chưa đúng.";return}try{localStorage.setItem("mathec_vlink","https://www.youtube-nocookie.com/embed/"+m[1])}catch(e){}loadVM()};
+$("vx").onclick=async()=>{try{await idbDel("sample")}catch(e){}try{localStorage.removeItem("mathec_vlink")}catch(e){}loadVM()};
+$("tog").onclick=()=>document.querySelector('nav button[data-t="grade"]').click();
+loadVM();
+/* ---------- CHẤM VIDEO ---------- */
+let runs=[],cur=null;try{runs=JSON.parse(localStorage.getItem("mathec_runs")||"[]")}catch(e){}
+const persist=()=>{try{localStorage.setItem("mathec_runs",JSON.stringify(runs))}catch(e){}};const msg=t=>$("msg").textContent=t;
+$("file").onchange=()=>{const f=$("file").files[0];if(f){$("pv").src=URL.createObjectURL(f);$("pv").hidden=false}};
+function stats(){let n=0,m=0;runs.forEach(r=>r.rows.forEach(x=>{if(x.t){n++;if(x.t===x.ai)m++}}));$("st").textContent=n?`${runs.length} lượt, đã so ${n} bước, khớp ${m} (${Math.round(100*m/n)}%).`:"Chưa có dữ liệu."}stats();
+$("go").onclick=async()=>{
+ const key=$("key").value.trim(),f=$("file").files[0],S=steps();
+ if(!key||!f||!S.length){msg("Cần nhập khóa API, bảng kiểm và chọn video.");return}
+ $("go").disabled=true;$("out").hidden=true;
+ try{
+  const {GoogleGenAI,createUserContent,createPartFromUri}=await import("https://esm.sh/@google/genai@1.0.0");
+  const ai=new GoogleGenAI({apiKey:key});msg("Đang tải video lên...");
+  let file=await ai.files.upload({file:f,config:{mimeType:f.type||"video/mp4"}});
+  while(file.state==="PROCESSING"){msg("Google đang xử lý video...");await new Promise(r=>setTimeout(r,2500));file=await ai.files.get({name:file.name})}
+  if(file.state==="FAILED")throw new Error("Google không xử lý được video này.");
+  msg("AI đang chấm...");
+  const prompt=`Bạn là trợ lý chấm kỹ năng lâm sàng cho sinh viên Y. Xem video và chấm theo bảng kiểm.
+Quy tắc: chỉ chấm điều nhìn thấy rõ; không thấy rõ thì ghi "Không xác định", không đoán; không chẩn đoán; không đánh giá ngoài bảng kiểm.
+Bảng kiểm:
+${S.map((s,i)=>`${i+1}. ${s}`).join("\n")}
+Chỉ trả về JSON đúng dạng: {"steps":[{"n":1,"status":"Đạt|Chưa đạt|Không xác định","time_sec":số hoặc null,"reason":"lý do ngắn bằng tiếng Việt"}],"advice":["lời khuyên 1","lời khuyên 2"]}. Có đúng ${S.length} phần tử trong "steps".`;
+  const res=await ai.models.generateContent({model:$("model").value.trim(),contents:createUserContent([createPartFromUri(file.uri,file.mimeType),prompt]),config:{responseMimeType:"application/json",temperature:0}});
+  const d=JSON.parse(res.text);
+  cur={video:f.name,rows:S.map((s,i)=>{const x=(d.steps||[]).find(y=>y.n==i+1)||{};return{n:i+1,step:s,ai:ST.includes(x.status)?x.status:"Không xác định",time:x.time_sec,reason:x.reason||"",t:""}})};
+  $("rows").innerHTML=cur.rows.map((r,i)=>`<div class="r"><b>Bước ${r.n}: ${esc(r.step)}</b><span class="${r.ai=="Đạt"?"ok":r.ai=="Chưa đạt"?"bad":"na"}">AI: ${r.ai}</span> <small>${r.time!=null?"giây "+esc(r.time)+". ":""}${esc(r.reason)}</small><label for="t${i}">Giảng viên chấm</label><select id="t${i}" data-i="${i}"><option value="">— chọn —</option>${ST.map(s=>`<option>${s}</option>`).join("")}</select></div>`).join("");
+  $("adv").innerHTML="<b>Gợi ý:</b> "+esc((d.advice||[]).join(" · "));$("out").hidden=false;msg("Xong.");
+ }catch(e){msg("Lỗi: "+(e.message||e))}
+ $("go").disabled=false;
+};
+$("save").onclick=()=>{if(!cur)return;document.querySelectorAll("#rows select").forEach(s=>cur.rows[+s.dataset.i].t=s.value);runs.push(cur);cur=null;persist();stats();$("out").hidden=true;msg("Đã lưu lượt này.")};
+$("csv").onclick=()=>{const L=["video,buoc,AI,giang_vien"];runs.forEach(r=>r.rows.forEach(x=>L.push([`"${r.video.replace(/"/g,'""')}"`,x.n,x.ai,x.t].join(","))));const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+L.join("\n")],{type:"text/csv"}));a.download="mathec-do-khop.csv";a.click()};
+$("clr").onclick=()=>{if(confirm("Xóa dữ liệu đã lưu trên máy này?")){runs=[];persist();stats()}};
+/* ---------- LUYỆN LIVE ---------- */
+const V=$("v"),C=$("c"),X=C.getContext("2d"),SEC=7;let lm,hist=[],sess=null,cueAt=0;
+const dist=(a,b)=>Math.hypot((a.x-b.x)*C.width,(a.y-b.y)*C.height);
+$("start").onclick=async()=>{
+ $("start").disabled=true;$("cue").textContent="Đang tải mô hình AI...";
+ try{
+  const {HandLandmarker,FilesetResolver}=await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3");
+  const fs=await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+  const o=d=>({baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",delegate:d},runningMode:"VIDEO",numHands:2});
+  try{lm=await HandLandmarker.createFromOptions(fs,o("GPU"))}catch(e){lm=await HandLandmarker.createFromOptions(fs,o("CPU"))}
+  V.srcObject=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user",width:{ideal:960},height:{ideal:720}},audio:false});
+  await V.play();C.width=V.videoWidth;C.height=V.videoHeight;
+  $("begin").disabled=false;$("cue").textContent='Sẵn sàng. Nhấn "Bắt đầu rửa tay".';requestAnimationFrame(loop);
+ }catch(e){$("cue").textContent="Không khởi động được ("+(e.message||e)+"). Cần https và cho phép camera.";$("start").disabled=false}
+};
+$("begin").onclick=()=>{if(sess){fin();return}sess={last:performance.now(),total:0,active:0,stepAct:0,i:0,bad:0,cues:0};$("sum").hidden=true;$("begin").textContent="Dừng";show()};
+const LS=()=>steps().slice(0,6);
+function show(){$("st2").textContent=`Bước ${sess.i+1}/6: ${LS()[sess.i]||""}`}
+function fin(done){const s=sess;sess=null;$("begin").textContent="Bắt đầu rửa tay";$("pb").style.width="0";$("st2").textContent=done?"Hoàn thành 6/6 bước":"Đã dừng";
+ const p=s.total?Math.round(100*s.active/s.total):0;$("sum").hidden=false;
+ $("sum").textContent=`Kết quả buổi luyện (điểm luyện tập)\nTổng thời gian: ${s.total.toFixed(0)} giây\nThời gian chà thật sự: ${s.active.toFixed(0)} giây (${p}%)\nSố lần AI nhắc: ${s.cues}\nĐã qua ${done?6:s.i} trên 6 bước theo thời gian chà.`}
+function loop(){
+ requestAnimationFrame(loop);if(V.readyState<2)return;
+ const now=performance.now(),H=lm.detectForVideo(V,now).landmarks||[];
+ X.clearRect(0,0,C.width,C.height);X.fillStyle="#2dd4bf";H.forEach(h=>h.forEach(p=>{X.beginPath();X.arc(p.x*C.width,p.y*C.height,4,0,7);X.fill()}));
+ let tog=false,speed=0;
+ if(H.length===2){
+  const cs=H.map(h=>{const k=[0,5,9,13,17];return{x:k.reduce((s,i)=>s+h[i].x,0)/5,y:k.reduce((s,i)=>s+h[i].y,0)/5,z:dist(h[0],h[9])}});
+  const size=(cs[0].z+cs[1].z)/2||1,mid={x:(cs[0].x+cs[1].x)/2,y:(cs[0].y+cs[1].y)/2},r={x:cs[1].x-cs[0].x,y:cs[1].y-cs[0].y};
+  tog=dist(cs[0],cs[1])/size<+$("tg").value;
+  hist.push({t:now,mid,r});while(hist.length&&now-hist[0].t>600)hist.shift();
+  const ref=hist.find(e=>now-e.t<=350),dt=(now-ref.t)/1000;
+  speed=dt>0.1?(dist(mid,ref.mid)+dist(r,ref.r))/size/dt:0;
+ }else hist=[];
+ const act=tog&&speed>+$("mv").value;
+ $("bd").textContent=H.length<2?`Thấy ${H.length}/2 bàn tay`:act?"Đang chà":tog?"Áp sát, chưa chuyển động":"Hai tay chưa áp sát";$("bd").className="badge"+(act?" on":"");
+ if(!sess)return;
+ const dt=(now-sess.last)/1000;sess.last=now;sess.total+=dt;if(act){sess.active+=dt;sess.stepAct+=dt}
+ const pr=H.length<2?"Đưa cả hai tay vào khung hình.":!tog?"Áp hai bàn tay sát vào nhau.":!(speed>+$("mv").value)?"Chà tay, đừng đứng yên.":null;
+ sess.bad=pr?sess.bad+dt:0;
+ if(pr&&sess.bad>1.5&&now-cueAt>3500){cueAt=now;sess.cues++;$("cue").textContent=pr;$("cue").className="cue w"}else if(!pr){$("cue").className="cue";if(act)$("cue").textContent="Tốt, tiếp tục chà."}
+ $("pb").style.width=Math.min(100,100*(sess.i*SEC+sess.stepAct)/(6*SEC))+"%";
+ if(sess.stepAct>=SEC){sess.stepAct=0;sess.i++;if(sess.i>=6){fin(true);return}show()}
+}
+</script></body></html>
